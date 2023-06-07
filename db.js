@@ -1,18 +1,16 @@
 import mongoose from "mongoose";
+import dotenv from "dotenv";
 
-const dbRemote =
-  "mongodb+srv://tigranpetrosyants:uyZBwEFh6cDJyLF9@cluster0.ydigebr.mongodb.net/blog?retryWrites=true&w=majority";
+dotenv.config();
 
-function connectToDB() {
-  return mongoose
-    .connect(dbRemote)
-    .then(() => {
-      console.log("Connected to MongoDB");
-    })
-    .catch((err) => {
-      console.error("Failed to connect to MongoDB", err);
-      throw err;
-    });
+async function connectToDB() {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log("Connected to MongoDB");
+  } catch (err) {
+    console.error("Failed to connect to MongoDB", err);
+    throw err;
+  }
 }
 
 export default connectToDB;

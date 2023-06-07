@@ -1,5 +1,7 @@
+import dotenv from "dotenv";
 import express from "express";
 import multer from "multer";
+import cors from "cors";
 
 import { loginValidation, registerValidation } from "./validations/auth.js";
 import { postCreateValidation } from "./validations/post.js";
@@ -22,6 +24,7 @@ import {
   updatePost,
 } from "./controllers/PostController.js";
 
+dotenv.config();
 
 connectToDB();
 
@@ -39,6 +42,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 app.use(express.json());
+app.use(cors());
 app.use("/uploads", express.static("uploads"));
 
 app.post("/uploads", checkAuth, upload.single("image"), (req, res) => {
@@ -47,7 +51,12 @@ app.post("/uploads", checkAuth, upload.single("image"), (req, res) => {
   });
 });
 
-app.post("/auth/register", registerValidation, handleValidationErrors, createUser);
+app.post(
+  "/auth/register",
+  registerValidation,
+  handleValidationErrors,
+  createUser
+);
 
 app.post("/auth/login", loginValidation, handleValidationErrors, loginUser);
 
@@ -57,13 +66,25 @@ app.get("/posts", getPosts);
 
 app.get("/posts/:id", getPost);
 
-app.post("/posts", checkAuth, postCreateValidation, handleValidationErrors, createPost);
+app.post(
+  "/posts",
+  checkAuth,
+  postCreateValidation,
+  handleValidationErrors,
+  createPost
+);
 
 app.delete("/posts/:id", checkAuth, deletePost);
 
-app.patch("/posts/:id", checkAuth, postCreateValidation, handleValidationErrors, updatePost);
+app.patch(
+  "/posts/:id",
+  checkAuth,
+  postCreateValidation,
+  handleValidationErrors,
+  updatePost
+);
 
-app.listen(4444, (err) => {
+app.listen(process.env.PORT || 4444, (err) => {
   if (err) {
     return console.log(err);
   }
