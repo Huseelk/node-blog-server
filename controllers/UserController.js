@@ -1,4 +1,3 @@
-import { validationResult } from "express-validator";
 import UserModel from ".././models/User.js";
 
 import jwt from "jsonwebtoken";
@@ -6,11 +5,6 @@ import bcrypt from "bcrypt";
 
 async function createUser(req, res) {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json(errors.array());
-    }
-
     const password = req.body.password;
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
