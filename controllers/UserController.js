@@ -22,7 +22,7 @@ async function createUser(req, res) {
       {
         _id: user._id,
       },
-      "secret123",
+      process.env.JWTKEY,
       {
         expiresIn: "30d",
       }
@@ -67,7 +67,7 @@ async function loginUser(req, res) {
       {
         _id: user._id,
       },
-      "secret123",
+      process.env.JWTKEY,
       {
         expiresIn: "30d",
       }
