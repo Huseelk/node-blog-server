@@ -6,7 +6,7 @@ async function createPost(req, res) {
       title: req.body.title,
       text: req.body.text,
       imageUrl: req.body.imageUrl,
-      tags: req.body.tags,
+      tags: req.body.tags.split(","),
       user: req.userId,
     });
 
@@ -23,7 +23,7 @@ async function createPost(req, res) {
 
 async function getPosts(req, res) {
   try {
-    const posts = await PostModel.find();
+    const posts = await PostModel.find().populate("user").exec();
 
     res.json(posts);
   } catch (error) {
@@ -48,7 +48,9 @@ async function getPost(req, res) {
       {
         returnDocument: "after",
       }
-    );
+    )
+      .populate("user")
+      .exec();
 
     if (!post) {
       return res.status(404).json({
@@ -120,4 +122,26 @@ async function updatePost(req, res) {
   }
 }
 
-export { createPost, getPosts, getPost, deletePost, updatePost };
+async function getTags(req, res) {
+  try {
+    const posts = await PostModel.find().limit(5).exec();
+
+    const tags = [
+      ...new Set(
+        posts
+          .map((obյ) => obյ.tags)
+          .flat()
+          .slice(0, 5)
+      ),
+    ];
+
+    res.json(tags);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Can't get posts",
+    });
+  }
+}
+
+export { createPost, getPosts, getPost, deletePost, updatePost, getTags };

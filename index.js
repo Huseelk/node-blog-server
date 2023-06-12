@@ -21,6 +21,7 @@ import {
   deletePost,
   getPost,
   getPosts,
+  getTags,
   updatePost,
 } from "./controllers/PostController.js";
 
@@ -63,6 +64,8 @@ app.post("/auth/login", loginValidation, handleValidationErrors, loginUser);
 app.get("/auth/me", checkAuth, getUser);
 
 app.get("/posts", getPosts);
+
+app.get("/tags", getTags);
 
 app.get("/posts/:id", getPost);
 
