@@ -12,5 +12,5 @@ export const postCreateValidation = [
     })
     .isString(),
   body("tags", "Not valide type of tags (set array)").optional().isString(),
-  body("imageUrl", "Invalid URL").optional().isURL(),
+  body("imageUrl", "Invalid URL").optional().isString(),
 ];

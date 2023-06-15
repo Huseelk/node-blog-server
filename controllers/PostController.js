@@ -3,10 +3,10 @@ import PostModel from "../models/Post.js";
 async function createPost(req, res) {
   try {
     const doc = new PostModel({
-      title: req.body.title,
-      text: req.body.text,
-      imageUrl: req.body.imageUrl,
-      tags: req.body.tags.split(","),
+      title: req.body.title.trim(),
+      text: req.body.text.trim(),
+      imageUrl: req.body?.imageUrl.trim(),
+      tags: req.body?.tags.trim().split(" "),
       user: req.userId,
     });
 
@@ -23,7 +23,11 @@ async function createPost(req, res) {
 
 async function getPosts(req, res) {
   try {
-    const posts = await PostModel.find().populate("user").exec();
+    const posts = await PostModel.find()
+      .sort("-date")
+      .populate("user")
+      .sort({ createdAt: -1 })
+      .exec();
 
     res.json(posts);
   } catch (error) {
@@ -101,7 +105,12 @@ async function updatePost(req, res) {
         _id: postId,
       },
       {
-        $set: req.body,
+        $set: {
+          title: req.body?.title.trim(),
+          text: req.body?.text.trim(),
+          imageUrl: req.body?.imageUrl,
+          tags: req.body?.tags.trim().split(" "),
+        },
       }
     );
 
@@ -117,7 +126,7 @@ async function updatePost(req, res) {
   } catch (error) {
     console.log(error);
     res.status(500).json({
-      message: "Can't remove post",
+      message: "Can't update post",
     });
   }
 }
@@ -144,4 +153,35 @@ async function getTags(req, res) {
   }
 }
 
-export { createPost, getPosts, getPost, deletePost, updatePost, getTags };
+async function getTagPost(req, res) {
+  try {
+    const tagName = req.params.tag;
+
+    const posts = await PostModel.find().populate("user").exec();
+
+    const tagPosts = posts.filter((obj) => obj.tags.includes(tagName));
+
+    if (tagPosts.length > 0) {
+      return res.json(tagPosts);
+    }
+
+    res.status(500).json({
+      message: "Posts with this tag not founded",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Can't get tag posts",
+    });
+  }
+}
+
+export {
+  createPost,
+  getPosts,
+  getPost,
+  deletePost,
+  updatePost,
+  getTags,
+  getTagPost,
+};
