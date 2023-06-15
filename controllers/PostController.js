@@ -5,8 +5,8 @@ async function createPost(req, res) {
     const doc = new PostModel({
       title: req.body.title.trim(),
       text: req.body.text.trim(),
-      imageUrl: req.body?.imageUrl.trim(),
-      tags: req.body?.tags.trim().split(" "),
+      imageUrl: req.body?.imageUrl,
+      tags: req.body?.tags && req.body?.tags.trim().split(" "),
       user: req.userId,
     });
 
@@ -100,18 +100,41 @@ async function updatePost(req, res) {
   try {
     const postId = req.params.id;
 
+    const { title, text, imageUrl, tags } = req.body;
+
+    const sanitizedTitle = title?.trim();
+    const sanitizedText = text?.trim();
+    const sanitizedImageUrl = imageUrl;
+    const sanitizedTags = tags && tags.trim().split(" ");
+
+    if (!sanitizedTitle || !sanitizedText) {
+      return res.status(400).json({ error: "Title and text are required." });
+    }
+
+    const update = {
+      $set: {
+        title: sanitizedTitle,
+        text: sanitizedText,
+      },
+    };
+
+    if (!sanitizedTags || sanitizedTags.length === 0) {
+      update.$unset = { tags: "" };
+    } else {
+      update.$set.tags = sanitizedTags;
+    }
+
+    if (!sanitizedImageUrl) {
+      update.$unset = { imageUrl: "" };
+    } else {
+      update.$set.imageUrl = sanitizedImageUrl;
+    }
+
     const post = await PostModel.updateOne(
       {
         _id: postId,
       },
-      {
-        $set: {
-          title: req.body?.title.trim(),
-          text: req.body?.text.trim(),
-          imageUrl: req.body?.imageUrl,
-          tags: req.body?.tags.trim().split(" "),
-        },
-      }
+      update
     );
 
     if (!post) {
